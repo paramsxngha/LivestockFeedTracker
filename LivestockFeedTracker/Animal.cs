@@ -1,5 +1,5 @@
 ﻿using System;
-namespace FarmingFeedingApp
+namespace LivestockFeedTracker
 {
     public class Animal
     {
@@ -59,28 +59,6 @@ namespace FarmingFeedingApp
         public double GetWeeklyCost()
         {
             return GetTotalWeeklyFood() * gramCost;
-        }
-        // Returns average grams eaten per day
-        public double GetDailyAverage()
-        {
-            return GetTotalWeeklyFood() / foodEachDay.Length;
-        }
-        // Checks weekly food against healthy range
-        public string GetFeedingStatus(double minFood, double maxFood)
-        {
-            double total = GetTotalWeeklyFood();
-            if (total < minFood)
-            {
-                return "Undereating";
-            }
-            else if (total > maxFood)
-            {
-                return "Overeating";
-            }
-            else
-            {
-                return "Correct";
-            }
         }
     }
 }
