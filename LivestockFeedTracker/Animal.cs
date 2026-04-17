@@ -5,16 +5,14 @@ namespace LivestockFeedTracker
     {
         // Fields
         private string animalName;
-        private string animalID;
         private string speciesName;
         private string foodTypeName;
         private double[] foodEachDay;
         private double gramCost;
         // Constructor
-        public Animal(string animalName, string animalID, string speciesName, string foodTypeName, double[] foodEachDay, double gramCost)
+        public Animal(string animalName, string speciesName, string foodTypeName, double[] foodEachDay, double gramCost)
         {
             this.animalName = animalName;
-            this.animalID = animalID;
             this.speciesName = speciesName;
             this.foodTypeName = foodTypeName;
             this.foodEachDay = foodEachDay;
@@ -24,10 +22,6 @@ namespace LivestockFeedTracker
         public string GetAnimalName()
         {
             return animalName;
-        }
-        public string GetAnimalID()
-        {
-            return animalID;
         }
         public string GetSpeciesName()
         {
@@ -55,10 +49,32 @@ namespace LivestockFeedTracker
             }
             return total;
         }
+        // Returns average grams eaten per day
+        public double GetDailyAverage()
+        {
+            return GetTotalWeeklyFood() / foodEachDay.Length;
+        }
         // Returns total cost to feed this animal for the week
         public double GetWeeklyCost()
         {
             return GetTotalWeeklyFood() * gramCost;
+        }
+        // Checks weekly food against healthy range
+        public string GetFeedingStatus(double minFood, double maxFood)
+        {
+            double total = GetTotalWeeklyFood();
+            if (total < minFood)
+            {
+                return "Undereating";
+            }
+            else if (total > maxFood)
+            {
+                return "Overeating";
+            }
+            else
+            {
+                return "Correct";
+            }
         }
     }
 }

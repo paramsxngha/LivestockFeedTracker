@@ -67,5 +67,24 @@ namespace LivestockFeedTracker
         {
             return new List<string>(foodBySpecies.Keys);
         }
+        // Returns healthy food range for a given species
+        public (double min, double max) GetFeedingRange(string species)
+        {
+            if (species == "Dairy Cow") return (49000, 70000);
+            if (species == "Beef Cow") return (42000, 63000);
+            if (species == "Sheep") return (2800, 4900);
+            if (species == "Pig") return (7000, 14000);
+            return (700, 1050);
+        }
+        // Adds up all animals weekly costs and returns the total
+        public double GetTotalFarmCost()
+        {
+            double total = 0;
+            foreach (Animal a in animalList)
+            {
+                total += a.GetWeeklyCost();
+            }
+            return total;
+        }
     }
 }

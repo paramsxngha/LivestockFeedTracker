@@ -9,15 +9,12 @@ namespace LivestockFeedTracker
             "Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"
         };
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Welcome to the Farm Animal Feeding Tracker\n");
 
+        static void OneAnimal()
+        {
+            Console.WriteLine("\n--- New Animal ---");
             Console.WriteLine("Enter Animal Name:");
             string name = Console.ReadLine();
-
-            Console.WriteLine("Enter Animal ID:");
-            string id = Console.ReadLine();
 
             List<string> species = appManager.GetSpeciesList();
             Console.WriteLine("\nSelect species:");
@@ -45,7 +42,41 @@ namespace LivestockFeedTracker
                 foodEachDay[i] = Convert.ToDouble(Console.ReadLine());
             }
 
+            double gramCost = appManager.GetFeedCost(chosenFood);
+            Animal newAnimal = new Animal(name, chosenSpecies, chosenFood, foodEachDay, gramCost);
+            appManager.AddAnimal(newAnimal);
+
+            var (min, max) = appManager.GetFeedingRange(chosenSpecies);
+
+            Console.WriteLine("\n--- Animal Summary ---");
+            Console.WriteLine($"Name      : {name}");
+            Console.WriteLine($"Species   : {chosenSpecies}");
+            Console.WriteLine($"Food Type : {chosenFood}");
+            Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
+            Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
+            Console.WriteLine($"Cost      : ${newAnimal.GetWeeklyCost():F2}");
+            Console.WriteLine($"Status    : {newAnimal.GetFeedingStatus(min, max)}");
+
+            Console.WriteLine("\nPress Enter to continue...");
             Console.ReadLine();
+            Console.Clear();
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Welcome to the Farm Animal Feeding Tracker\n");
+
+            string proceed = "";
+            while (proceed.Equals(""))
+            {
+                OneAnimal();
+                Console.WriteLine("Press <Enter> to add another animal or type 'Stop' to finish.");
+                proceed = Console.ReadLine().ToUpper();
+            }
+
+            Console.WriteLine($"\nTotal Farm Cost This Week: ${appManager.GetTotalFarmCost():F2}");
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
         }
     }
 }
