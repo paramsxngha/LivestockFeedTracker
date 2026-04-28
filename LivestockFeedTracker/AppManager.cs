@@ -22,6 +22,8 @@ namespace LivestockFeedTracker
         static readonly double OATS = 0.00031;
         static readonly double ALFALFA = 0.00048;
         static readonly double MIXED_HAY = 0.00033;
+        static readonly double CLOVER = 0.00025;
+        static readonly double BARLEY = 0.00034;
 
         // Maps each species to its food types
         static Dictionary<string, List<string>> foodBySpecies = new Dictionary<string, List<string>>()
@@ -31,7 +33,7 @@ namespace LivestockFeedTracker
             { "Sheep",     new List<string>() { "Pasture Grass", "Silage", "Grain Mix" } },
             { "Pig",       new List<string>() { "Corn", "Soybean Meal", "Wheat" } },
             { "Chicken",   new List<string>() { "Layer Feed", "Corn", "Oats" } },
-            { "Goat",      new List<string>() { "Mixed Hay", "Pasture Grass", "Grain Mix" } },
+            { "Goat",      new List<string>() { "Mixed Hay", "Clover", "Barley" } },
             { "Buffalo",   new List<string>() { "Alfalfa", "Maize Silage", "Grass Silage" } }
         };
 
@@ -51,7 +53,9 @@ namespace LivestockFeedTracker
             { "Layer Feed",       LAYER_FEED },
             { "Oats",             OATS },
             { "Alfalfa",          ALFALFA },
-            { "Mixed Hay",        MIXED_HAY }
+            { "Mixed Hay",        MIXED_HAY },
+            { "Clover",           CLOVER },
+            { "Barley",           BARLEY }
         };
 
         // Constructor
@@ -60,31 +64,26 @@ namespace LivestockFeedTracker
             farmerBudget = budget;
         }
 
-        // Adds a new animal to the list
         public void AddAnimal(Animal a)
         {
             animalList.Add(a);
         }
 
-        // Returns food types for a given species
         public List<string> GetFoodsForSpecies(string species)
         {
             return foodBySpecies[species];
         }
 
-        // Returns cost per gram for a given food type
         public double GetFeedCost(string foodType)
         {
             return feedCosts[foodType];
         }
 
-        // Returns the full species list
         public List<string> GetSpeciesList()
         {
             return new List<string>(foodBySpecies.Keys);
         }
 
-        // Returns healthy food range for a given species
         public (double min, double max) GetFeedingRange(string species)
         {
             if (species == "Dairy Cow") return (49000, 70000);
@@ -93,10 +92,9 @@ namespace LivestockFeedTracker
             if (species == "Pig") return (7000, 14000);
             if (species == "Chicken") return (700, 1050);
             if (species == "Goat") return (3500, 6000);
-            if (species == "Buffalo") return (56000, 84000);
+            return (56000, 84000);
         }
 
-        // Adds up all animals weekly costs
         public double GetTotalFarmCost()
         {
             double total = 0;
@@ -107,15 +105,72 @@ namespace LivestockFeedTracker
             return total;
         }
 
-        // Compares total cost to budget
+        // Compares total cost to budget and returns a message
         public string CheckFarmerBudget()
         {
-            double diff = GetTotalFarmCost() - farmerBudget;
-            if (diff > 0)
+            double total = GetTotalFarmCost();
+            if (total > farmerBudget)
             {
-                return $"OVER BUDGET by ${diff:F2}";
+                double over = total - farmerBudget;
+                return $"OVER BUDGET by ${over:F2}";
             }
-            return $"Under budget by ${Math.Abs(diff):F2}";
+            double under = farmerBudget - total;
+            return $"Under budget by ${under:F2}";
+        }
+
+        public List<Animal> GetVetList()
+        {
+            List<Animal> vetList = new List<Animal>();
+            foreach (Animal a in animalList)
+            {
+                double min = GetFeedingRange(a.GetSpeciesName()).min;
+                if (a.NeedsVet(min))
+                {
+                    vetList.Add(a);
+                }
+            }
+            return vetList;
+        }
+
+        public void ShowFarmSummary()
+        {
+            Console.WriteLine("\n========================================");
+            Console.WriteLine("      WEEKLY FEEDING COST SUMMARY       ");
+            Console.WriteLine("========================================");
+
+            foreach (string s in foodBySpecies.Keys)
+            {
+                double speciesCost = 0;
+                foreach (Animal a in animalList)
+                {
+                    if (a.GetSpeciesName() == s)
+                    {
+                        speciesCost += a.GetWeeklyCost();
+                    }
+                }
+                if (speciesCost > 0)
+                {
+                    Console.WriteLine($"{s} : ${speciesCost:F2}");
+                }
+            }
+
+            Console.WriteLine($"\nTotal Cost    : ${GetTotalFarmCost():F2}");
+            Console.WriteLine($"Budget Status : {CheckFarmerBudget()}");
+
+            List<Animal> vets = GetVetList();
+            Console.WriteLine("\n--- Vet Alerts ---");
+            if (vets.Count == 0)
+            {
+                Console.WriteLine("None");
+            }
+            else
+            {
+                foreach (Animal a in vets)
+                {
+                    Console.WriteLine($"{a.GetAnimalName()} ({a.GetSpeciesName()}) - needs vet attention");
+                }
+            }
+            Console.WriteLine("========================================");
         }
     }
 }

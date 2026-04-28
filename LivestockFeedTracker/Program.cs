@@ -26,7 +26,7 @@ namespace LivestockFeedTracker
             int speciesChoice = Convert.ToInt32(Console.ReadLine()) - 1;
             string chosenSpecies = species[speciesChoice];
 
-            // Show food menu for chosen species
+            // Show food menu
             List<string> foods = appManager.GetFoodsForSpecies(chosenSpecies);
             Console.WriteLine("\nSelect food type:");
             for (int i = 0; i < foods.Count; i++)
@@ -36,7 +36,7 @@ namespace LivestockFeedTracker
             int foodChoice = Convert.ToInt32(Console.ReadLine()) - 1;
             string chosenFood = foods[foodChoice];
 
-            // Enter food for each day
+            // Enter food amounts for each day
             double[] foodEachDay = new double[7];
             Console.WriteLine("\nEnter grams eaten each day:");
             for (int i = 0; i < DAYS.Count; i++)
@@ -50,8 +50,9 @@ namespace LivestockFeedTracker
             appManager.AddAnimal(newAnimal);
 
             var (min, max) = appManager.GetFeedingRange(chosenSpecies);
+            string status = newAnimal.GetFeedingStatus(min, max);
 
-            // Print summary for this animal
+            // Print animal summary
             Console.WriteLine("\n--- Animal Summary ---");
             Console.WriteLine($"Name      : {name}");
             Console.WriteLine($"Species   : {chosenSpecies}");
@@ -63,7 +64,21 @@ namespace LivestockFeedTracker
             Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
             Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
             Console.WriteLine($"Cost      : ${newAnimal.GetWeeklyCost():F2}");
-            Console.WriteLine($"Status    : {newAnimal.GetFeedingStatus(min, max)}");
+            Console.WriteLine($"Status    : {status}");
+
+            // Show consequence if not eating correctly
+            if (status != "Correct")
+            {
+                Console.WriteLine($"Warning   : {appManager.GetConsequence(chosenSpecies, status)}");
+            }
+
+            // Show vet alert if severely undereating
+            if (newAnimal.NeedsVet(min))
+            {
+                Console.WriteLine("VET ALERT : This animal needs to see a vet immediately.");
+            }
+
+            // Show budget after each animal added
             Console.WriteLine($"Budget    : {appManager.CheckFarmerBudget()}");
 
             Console.WriteLine("\nPress Enter to continue...");
@@ -75,7 +90,7 @@ namespace LivestockFeedTracker
         {
             Console.WriteLine("Welcome to the Farm Animal Feeding Tracker\n");
 
-            // Ask for budget before starting
+            // Get budget before starting
             Console.WriteLine("Enter your weekly feeding budget ($):");
             double budget = Convert.ToDouble(Console.ReadLine());
             appManager = new AppManager(budget);
@@ -88,9 +103,9 @@ namespace LivestockFeedTracker
                 proceed = Console.ReadLine().ToUpper();
             }
 
-            // Show total at the end
-            Console.WriteLine($"\nTotal Farm Cost This Week: ${appManager.GetTotalFarmCost():F2}");
-            Console.WriteLine($"Budget Status: {appManager.CheckFarmerBudget()}");
+            // Show full farm summary at end
+            appManager.ShowFarmSummary();
+
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
         }

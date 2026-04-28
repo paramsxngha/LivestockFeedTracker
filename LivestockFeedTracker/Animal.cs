@@ -27,7 +27,7 @@ namespace LivestockFeedTracker
         public double[] GetFoodEachDay() { return foodEachDay; }
         public double GetGramCost() { return gramCost; }
 
-        // Adds up all 7 days and returns the total
+        // Adds up all 7 days
         public double GetTotalWeeklyFood()
         {
             double total = 0;
@@ -38,7 +38,7 @@ namespace LivestockFeedTracker
             return total;
         }
 
-        // Divides weekly total by 7
+        // Weekly total divided by 7
         public double GetDailyAverage()
         {
             return GetTotalWeeklyFood() / foodEachDay.Length;
