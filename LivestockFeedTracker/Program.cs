@@ -26,17 +26,19 @@ namespace LivestockFeedTracker
             int speciesChoice = Convert.ToInt32(Console.ReadLine()) - 1;
             string chosenSpecies = species[speciesChoice];
 
-            // Show food menu
+            // Show food menu with price per 100g
             List<string> foods = appManager.GetFoodsForSpecies(chosenSpecies);
             Console.WriteLine("\nSelect food type:");
             for (int i = 0; i < foods.Count; i++)
             {
-                Console.WriteLine($"  {i + 1}. {foods[i]}");
+                double pricePer100g = appManager.GetFeedCost(foods[i]) * 100;
+                Console.WriteLine($"  {i + 1}. {foods[i]} (${pricePer100g:F2} per 100g)");
             }
             int foodChoice = Convert.ToInt32(Console.ReadLine()) - 1;
             string chosenFood = foods[foodChoice];
+            double gramCost = appManager.GetFeedCost(chosenFood);
 
-            // Enter food amounts for each day
+            // Enter food for each day
             double[] foodEachDay = new double[7];
             Console.WriteLine("\nEnter grams eaten each day:");
             for (int i = 0; i < DAYS.Count; i++)
@@ -45,21 +47,19 @@ namespace LivestockFeedTracker
                 foodEachDay[i] = Convert.ToDouble(Console.ReadLine());
             }
 
-            double gramCost = appManager.GetFeedCost(chosenFood);
             Animal newAnimal = new Animal(name, chosenSpecies, chosenFood, foodEachDay, gramCost);
             appManager.AddAnimal(newAnimal);
 
             var (min, max) = appManager.GetFeedingRange(chosenSpecies);
             string status = newAnimal.GetFeedingStatus(min, max);
 
-            // Print animal summary
             Console.WriteLine("\n--- Animal Summary ---");
             Console.WriteLine($"Name      : {name}");
             Console.WriteLine($"Species   : {chosenSpecies}");
-            Console.WriteLine($"Food Type : {chosenFood}");
+            Console.WriteLine($"Food Type : {chosenFood}  (${gramCost * 100:F2} per 100g)");
             for (int i = 0; i < DAYS.Count; i++)
             {
-                Console.WriteLine($"{DAYS[i]}: {foodEachDay[i]}g");
+                Console.WriteLine($"{DAYS[i]}: {foodEachDay[i]}g  (${foodEachDay[i] * gramCost:F2})");
             }
             Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
             Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
@@ -69,13 +69,13 @@ namespace LivestockFeedTracker
             // Show consequence if not eating correctly
             if (status != "Correct")
             {
-                Console.WriteLine($"Warning   : {appManager.GetConsequence(chosenSpecies, status)}");
+                Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
             }
 
             // Show vet alert if severely undereating
             if (newAnimal.NeedsVet(min))
             {
-                Console.WriteLine("VET ALERT : This animal needs to see a vet immediately.");
+                Console.WriteLine("VET ALERT : This animal needs to see a vet.");
             }
 
             // Show budget after each animal added

@@ -73,5 +73,29 @@ namespace LivestockFeedTracker
         {
             return GetTotalWeeklyFood() < (minFood * 0.70);
         }
+
+        // Returns the animal name and weekly cost as a short string
+        public string GetShortSummary()
+        {
+            return $"{animalName} ({speciesName}) - ${GetWeeklyCost():F2}/week";
+        }
+        // Returns the full formatted summary for this animal
+        public string GetAnimalSummary(double minFood, double maxFood)
+        {
+            string[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+            string summary = "\n--- Animal Summary ---\n";
+            summary += $"Name      : {animalName}\n";
+            summary += $"Species   : {speciesName}\n";
+            summary += $"Food Type : {foodTypeName}\n";
+            for (int i = 0; i < foodEachDay.Length; i++)
+            {
+                summary += $"{days[i]}: {foodEachDay[i]}g  (${foodEachDay[i] * gramCost:F2})\n";
+            }
+            summary += $"Total Food: {GetTotalWeeklyFood()}g\n";
+            summary += $"Daily Avg : {GetDailyAverage():F1}g\n";
+            summary += $"Cost      : ${GetWeeklyCost():F2}\n";
+            summary += $"Status    : {GetFeedingStatus(minFood, maxFood)}\n";
+            return summary;
+        }
     }
 }

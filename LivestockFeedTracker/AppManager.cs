@@ -118,6 +118,22 @@ namespace LivestockFeedTracker
             return $"Under budget by ${under:F2}";
         }
 
+        // Shows healthy range and tells farmer what to do
+        public string GetFeedingAdvice(string species, string status)
+        {
+            var (min, max) = GetFeedingRange(species);
+            if (status == "Undereating")
+            {
+                return $"Healthy range for {species} is {min}g - {max}g per week. Consider increasing feed.";
+            }
+            if (status == "Overeating")
+            {
+                return $"Healthy range for {species} is {min}g - {max}g per week. Consider reducing feed.";
+            }
+            return "";
+        }
+
+        // Returns all animals that need a vet
         public List<Animal> GetVetList()
         {
             List<Animal> vetList = new List<Animal>();
@@ -130,6 +146,84 @@ namespace LivestockFeedTracker
                 }
             }
             return vetList;
+        }
+
+        // Loops through all animals and returns the one with the highest weekly cost
+        public Animal GetHighestCostAnimal()
+        {
+            Animal highest = animalList[0];
+            foreach (Animal a in animalList)
+            {
+                if (a.GetWeeklyCost() > highest.GetWeeklyCost())
+                {
+                    highest = a;
+                }
+            }
+            return highest;
+        }
+
+        // Loops through all animals and returns the one that ate the most
+        public Animal GetHighestConsumptionAnimal()
+        {
+            Animal highest = animalList[0];
+            foreach (Animal a in animalList)
+            {
+                if (a.GetTotalWeeklyFood() > highest.GetTotalWeeklyFood())
+                {
+                    highest = a;
+                }
+            }
+            return highest;
+        }
+
+        // Counts how many animals per species and prints the result
+        public void CountBySpecies()
+        {
+            foreach (string s in foodBySpecies.Keys)
+            {
+                int count = 0;
+                foreach (Animal a in animalList)
+                {
+                    if (a.GetSpeciesName() == s)
+                    {
+                        count++;
+                    }
+                }
+                if (count > 0)
+                {
+                    Console.WriteLine($"{s}: {count}");
+                }
+            }
+        }
+
+        // Returns all animals that are overeating
+        public List<Animal> GetOvereatingList()
+        {
+            List<Animal> result = new List<Animal>();
+            foreach (Animal a in animalList)
+            {
+                var (min, max) = GetFeedingRange(a.GetSpeciesName());
+                if (a.GetFeedingStatus(min, max) == "Overeating")
+                {
+                    result.Add(a);
+                }
+            }
+            return result;
+        }
+
+        // Returns all animals that are undereating
+        public List<Animal> GetUndereatingList()
+        {
+            List<Animal> result = new List<Animal>();
+            foreach (Animal a in animalList)
+            {
+                var (min, max) = GetFeedingRange(a.GetSpeciesName());
+                if (a.GetFeedingStatus(min, max) == "Undereating")
+                {
+                    result.Add(a);
+                }
+            }
+            return result;
         }
 
         public void ShowFarmSummary()
@@ -153,6 +247,8 @@ namespace LivestockFeedTracker
                     Console.WriteLine($"{s} : ${speciesCost:F2}");
                 }
             }
+
+
 
             Console.WriteLine($"\nTotal Cost    : ${GetTotalFarmCost():F2}");
             Console.WriteLine($"Budget Status : {CheckFarmerBudget()}");
