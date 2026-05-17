@@ -29,6 +29,28 @@ namespace LivestockFeedTracker
             return FormatName(name);
         }
 
+        // Checks menu selection is within range
+        static int CheckMenuChoice(int count)
+        {
+            int choice;
+            while (true)
+            {
+                try
+                {
+                    choice = Convert.ToInt32(Console.ReadLine()) - 1;
+                    if (choice >= 0 && choice <= count - 1)
+                    {
+                        return choice;
+                    }
+                    Console.WriteLine($"Please enter a number between 1 and {count}.");
+                }
+                catch
+                {
+                    Console.WriteLine($"Please enter a number between 1 and {count}.");
+                }
+            }
+        }
+
         static void OneAnimal()
         {
             Console.WriteLine("\n--- New Animal ---");
@@ -42,12 +64,7 @@ namespace LivestockFeedTracker
             {
                 Console.WriteLine($"  {i + 1}. {species[i]}");
             }
-            int speciesChoice = Convert.ToInt32(Console.ReadLine()) - 1;
-            while (speciesChoice < 0 || speciesChoice > species.Count - 1)
-            {
-                Console.WriteLine($"Please enter a number between 1 and {species.Count}.");
-                speciesChoice = Convert.ToInt32(Console.ReadLine()) - 1;
-            }
+            int speciesChoice = CheckMenuChoice(species.Count);
             string chosenSpecies = species[speciesChoice];
 
             // Show food menu with price per 100g
@@ -58,25 +75,21 @@ namespace LivestockFeedTracker
                 double pricePer100g = appManager.GetFeedCost(foods[i]) * 100;
                 Console.WriteLine($"  {i + 1}. {foods[i]} (${pricePer100g:F2} per 100g)");
             }
-            int foodChoice = Convert.ToInt32(Console.ReadLine()) - 1;
-            while (foodChoice < 0 || foodChoice > foods.Count - 1)
-            {
-                Console.WriteLine($"Please enter a number between 1 and {foods.Count}.");
-                foodChoice = Convert.ToInt32(Console.ReadLine()) - 1;
-            }
+            int foodChoice = CheckMenuChoice(foods.Count);
             string chosenFood = foods[foodChoice];
             double gramCost = appManager.GetFeedCost(chosenFood);
 
             // Enter food for each day
             double[] foodEachDay = new double[7];
+            double maxDaily = appManager.GetMaxDailyFood(chosenSpecies);
             Console.WriteLine("\nEnter grams eaten each day:");
             for (int i = 0; i < DAYS.Count; i++)
             {
                 Console.WriteLine($"{DAYS[i]}:");
                 double amount = Convert.ToDouble(Console.ReadLine());
-                while (amount < 0)
+                while (amount < 0 || amount > maxDaily)
                 {
-                    Console.WriteLine("Amount must be 0 or greater.");
+                    Console.WriteLine($"Amount must be between 0 and {maxDaily}g for {chosenSpecies}.");
                     amount = Convert.ToDouble(Console.ReadLine());
                 }
                 foodEachDay[i] = amount;
@@ -99,7 +112,19 @@ namespace LivestockFeedTracker
             Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
             Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
             Console.WriteLine($"Cost      : ${newAnimal.GetWeeklyCost():F2}");
-            Console.WriteLine($"Status    : {status}");
+
+            // Show status in colour
+            Console.Write("Status    : ");
+            if (status == "Correct")
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            Console.WriteLine(status);
+            Console.ForegroundColor = ConsoleColor.White;
 
             // Show consequence if not eating correctly
             if (status != "Correct")
@@ -110,11 +135,24 @@ namespace LivestockFeedTracker
             // Show vet alert if severely undereating
             if (newAnimal.NeedsVet(min))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("VET ALERT : This animal needs to see a vet.");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             // Show budget after each animal added
-            Console.WriteLine($"Budget    : {appManager.CheckFarmerBudget()}");
+            string budgetStatus = appManager.CheckFarmerBudget();
+            Console.Write("Budget    : ");
+            if (budgetStatus.Contains("OVER"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            Console.WriteLine(budgetStatus);
+            Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine("\nPress Enter to continue...");
             Console.ReadLine();
