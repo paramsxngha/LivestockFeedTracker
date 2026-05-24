@@ -9,7 +9,6 @@ namespace LivestockFeedTracker
         private string foodTypeName;
         private double[] foodEachDay;
         private double gramCost;
-
         // Constructor
         public Animal(string animalName, string speciesName, string foodTypeName, double[] foodEachDay, double gramCost)
         {
@@ -19,14 +18,12 @@ namespace LivestockFeedTracker
             this.foodEachDay = foodEachDay;
             this.gramCost = gramCost;
         }
-
         // Getters
         public string GetAnimalName() { return animalName; }
         public string GetSpeciesName() { return speciesName; }
         public string GetFoodTypeName() { return foodTypeName; }
         public double[] GetFoodEachDay() { return foodEachDay; }
         public double GetGramCost() { return gramCost; }
-
         // Adds up all 7 days
         public double GetTotalWeeklyFood()
         {
@@ -37,19 +34,16 @@ namespace LivestockFeedTracker
             }
             return total;
         }
-
         // Weekly total divided by 7
         public double GetDailyAverage()
         {
             return GetTotalWeeklyFood() / foodEachDay.Length;
         }
-
         // Weekly food x cost per gram
         public double GetWeeklyCost()
         {
             return GetTotalWeeklyFood() * gramCost;
         }
-
         // Checks if animal is eating the right amount
         public string GetFeedingStatus(double minFood, double maxFood)
         {
@@ -67,13 +61,11 @@ namespace LivestockFeedTracker
                 return "Correct";
             }
         }
-
         // Returns true if animal is eating below 70% of the minimum
         public bool NeedsVet(double minFood)
         {
             return GetTotalWeeklyFood() < (minFood * 0.70);
         }
-
         // Returns the animal name and weekly cost as a short string
         public string GetShortSummary()
         {

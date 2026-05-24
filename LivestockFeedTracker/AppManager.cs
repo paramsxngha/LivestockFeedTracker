@@ -95,6 +95,13 @@ namespace LivestockFeedTracker
             return (56000, 84000);
         }
 
+        // Returns the max amount an animal can eat in a single day
+        public double GetMaxDailyFood(string species)
+        {
+            var (min, max) = GetFeedingRange(species);
+            return max / 7;
+        }
+
         public double GetTotalFarmCost()
         {
             double total = 0;
@@ -207,6 +214,7 @@ namespace LivestockFeedTracker
                 {
                     result.Add(a);
                 }
+
             }
             return result;
         }
