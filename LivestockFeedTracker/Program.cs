@@ -9,14 +9,12 @@ namespace LivestockFeedTracker
             "Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"
         };
-
         // Formats the name so first letter is uppercase and rest is lowercase
         static string FormatName(string input)
         {
             if (input.Length == 0) return input;
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
-
         // Checks the name is not blank and contains only letters
         static string CheckName()
         {
@@ -28,13 +26,11 @@ namespace LivestockFeedTracker
             }
             return FormatName(name);
         }
-
         static void OneAnimal()
         {
             Console.WriteLine("\n--- New Animal ---");
             Console.WriteLine("Enter Animal Name:");
             string name = CheckName();
-
             // Show species menu
             List<string> species = appManager.GetSpeciesList();
             Console.WriteLine("\nSelect species:");
@@ -49,7 +45,6 @@ namespace LivestockFeedTracker
                 speciesChoice = Convert.ToInt32(Console.ReadLine()) - 1;
             }
             string chosenSpecies = species[speciesChoice];
-
             // Show food menu with price per 100g
             List<string> foods = appManager.GetFoodsForSpecies(chosenSpecies);
             Console.WriteLine("\nSelect food type:");
@@ -66,7 +61,6 @@ namespace LivestockFeedTracker
             }
             string chosenFood = foods[foodChoice];
             double gramCost = appManager.GetFeedCost(chosenFood);
-
             // Enter food for each day
             double[] foodEachDay = new double[7];
             Console.WriteLine("\nEnter grams eaten each day:");
@@ -81,13 +75,10 @@ namespace LivestockFeedTracker
                 }
                 foodEachDay[i] = amount;
             }
-
             Animal newAnimal = new Animal(name, chosenSpecies, chosenFood, foodEachDay, gramCost);
             appManager.AddAnimal(newAnimal);
-
             var (min, max) = appManager.GetFeedingRange(chosenSpecies);
             string status = newAnimal.GetFeedingStatus(min, max);
-
             Console.WriteLine("\n--- Animal Summary ---");
             Console.WriteLine($"Name      : {name}");
             Console.WriteLine($"Species   : {chosenSpecies}");
@@ -99,32 +90,54 @@ namespace LivestockFeedTracker
             Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
             Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
             Console.WriteLine($"Cost      : ${newAnimal.GetWeeklyCost():F2}");
-            Console.WriteLine($"Status    : {status}");
+
+            // Show status in colour
+            Console.Write("Status    : ");
+            if (status == "Correct")
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            Console.WriteLine(status);
+            Console.ForegroundColor = ConsoleColor.White;
 
             // Show consequence if not eating correctly
             if (status != "Correct")
             {
                 Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
             }
-
             // Show vet alert if severely undereating
             if (newAnimal.NeedsVet(min))
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("VET ALERT : This animal needs to see a vet.");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             // Show budget after each animal added
-            Console.WriteLine($"Budget    : {appManager.CheckFarmerBudget()}");
+            string budgetStatus = appManager.CheckFarmerBudget();
+            Console.Write("Budget    : ");
+            if (budgetStatus.Contains("OVER"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            Console.WriteLine(budgetStatus);
+            Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine("\nPress Enter to continue...");
             Console.ReadLine();
             Console.Clear();
         }
-
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to the Farm Animal Feeding Tracker\n");
-
             // Get budget before starting
             Console.WriteLine("Enter your weekly feeding budget ($):");
             double budget = Convert.ToDouble(Console.ReadLine());
@@ -134,7 +147,6 @@ namespace LivestockFeedTracker
                 budget = Convert.ToDouble(Console.ReadLine());
             }
             appManager = new AppManager(budget);
-
             string proceed = "";
             while (proceed.Equals(""))
             {
@@ -142,10 +154,8 @@ namespace LivestockFeedTracker
                 Console.WriteLine("Press <Enter> to add another animal or type 'Stop' to finish.");
                 proceed = Console.ReadLine().ToUpper();
             }
-
             // Show full farm summary at end
             appManager.ShowFarmSummary();
-
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
         }
