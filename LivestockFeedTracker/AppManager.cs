@@ -214,7 +214,6 @@ namespace LivestockFeedTracker
                 {
                     result.Add(a);
                 }
-
             }
             return result;
         }
@@ -237,7 +236,9 @@ namespace LivestockFeedTracker
         public void ShowFarmSummary()
         {
             Console.WriteLine("\n========================================");
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("      WEEKLY FEEDING COST SUMMARY       ");
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("========================================");
 
             foreach (string s in foodBySpecies.Keys)
@@ -256,24 +257,96 @@ namespace LivestockFeedTracker
                 }
             }
 
-
-
             Console.WriteLine($"\nTotal Cost    : ${GetTotalFarmCost():F2}");
-            Console.WriteLine($"Budget Status : {CheckFarmerBudget()}");
 
+            // Show budget in colour
+            string budgetStatus = CheckFarmerBudget();
+            Console.Write("Budget Status : ");
+            if (budgetStatus.Contains("OVER"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            Console.WriteLine(budgetStatus);
+            Console.ForegroundColor = ConsoleColor.White;
+
+            // Show overeating list
+            List<Animal> over = GetOvereatingList();
+            Console.WriteLine("\n--- Overeating ---");
+            if (over.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("None");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                foreach (Animal a in over)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(a.GetShortSummary());
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+            }
+
+            // Show undereating list
+            List<Animal> under = GetUndereatingList();
+            Console.WriteLine("\n--- Undereating ---");
+            if (under.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("None");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                foreach (Animal a in under)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(a.GetShortSummary());
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+            }
+
+            // Show vet alert list
             List<Animal> vets = GetVetList();
             Console.WriteLine("\n--- Vet Alerts ---");
             if (vets.Count == 0)
             {
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("None");
+                Console.ForegroundColor = ConsoleColor.White;
             }
             else
             {
                 foreach (Animal a in vets)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"{a.GetAnimalName()} ({a.GetSpeciesName()}) - needs vet attention");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
             }
+
+            // Show highest cost and consumption animals
+            if (animalList.Count > 0)
+            {
+                Console.WriteLine("\n--- Highest Cost Animal ---");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(GetHighestCostAnimal().GetShortSummary());
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.WriteLine("\n--- Highest Consumption Animal ---");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(GetHighestConsumptionAnimal().GetShortSummary());
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.WriteLine("\n--- Animals Per Species ---");
+            CountBySpecies();
+
             Console.WriteLine("========================================");
         }
     }
