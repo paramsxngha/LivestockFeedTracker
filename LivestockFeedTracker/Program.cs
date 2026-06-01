@@ -17,32 +17,18 @@ namespace LivestockFeedTracker
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
 
-        // Checks the name is not blank and contains only letters and spaces
-        static string CheckName()
+        // Checks the name/id is not blank
+        static string CheckNameID()
         {
-            string name = Console.ReadLine();
-            while (name.Equals("") || !name.All(c => char.IsLetter(c) || c == ' '))
+            string input = Console.ReadLine();
+            while (input.Equals(""))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Invalid input. Please enter a name using letters only. (e.g. Molly)");
+                Console.WriteLine("Invalid input. Cannot be blank. (e.g. Molly#COW01)");
                 Console.ForegroundColor = ConsoleColor.White;
-                name = Console.ReadLine();
+                input = Console.ReadLine();
             }
-            return FormatName(name);
-        }
-
-        // Checks the ID is not blank
-        static string CheckID()
-        {
-            string id = Console.ReadLine();
-            while (id.Equals(""))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Invalid input. ID cannot be blank. (e.g. COW01)");
-                Console.ForegroundColor = ConsoleColor.White;
-                id = Console.ReadLine();
-            }
-            return id.ToUpper();
+            return input;
         }
 
         // Checks menu selection is within range and handles invalid input
@@ -120,15 +106,20 @@ namespace LivestockFeedTracker
             }
         }
 
+        // Prints a grey separator line between sections
+        static void PrintLine()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
         static void OneAnimal()
         {
+            PrintLine();
             Console.WriteLine("\n--- New Animal ---");
-
-            Console.WriteLine("Enter Animal Name:");
-            string name = CheckName();
-
-            Console.WriteLine("Enter Animal ID:");
-            string id = CheckID();
+            Console.WriteLine("Enter Animal Name/ID (e.g. Molly#COW01):");
+            string nameID = CheckNameID();
 
             // Show species menu
             List<string> species = appManager.GetSpeciesList();
@@ -162,14 +153,15 @@ namespace LivestockFeedTracker
                 foodEachDay[i] = CheckFoodAmount(maxDaily, chosenSpecies);
             }
 
-            Animal newAnimal = new Animal(name, chosenSpecies, chosenFood, foodEachDay, gramCost);
+            Animal newAnimal = new Animal(nameID, chosenSpecies, chosenFood, foodEachDay, gramCost);
             appManager.AddAnimal(newAnimal);
 
             var (min, max) = appManager.GetFeedingRange(chosenSpecies);
             string status = newAnimal.GetFeedingStatus(min, max);
 
+            PrintLine();
             Console.WriteLine("\n--- Animal Summary ---");
-            Console.WriteLine($"Name/ID   : {name} #{id}");
+            Console.WriteLine($"Name/ID   : {nameID}");
             Console.WriteLine($"Species   : {chosenSpecies}");
             Console.WriteLine($"Food Type : {chosenFood}  (${gramCost * 100:F2} per 100g)");
             for (int i = 0; i < DAYS.Count; i++)
@@ -185,17 +177,14 @@ namespace LivestockFeedTracker
             if (status == "Correct")
             {
                 Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(status);
+                Console.ForegroundColor = ConsoleColor.White;
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-            }
-            Console.WriteLine(status);
-            Console.ForegroundColor = ConsoleColor.White;
-
-            // Show consequence if not eating correctly
-            if (status != "Correct")
-            {
+                Console.WriteLine(status);
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
             }
 
@@ -228,8 +217,20 @@ namespace LivestockFeedTracker
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to the Farm Animal Feeding Tracker\n");
-
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(@"
++                                                                                                            
+ ▄▄▄▄▄▄▄                                      ▄▄▄▄▄▄▄             ▄▄                     ▄▄▄▄               
+███▀▀▀▀▀                   ▀▀                ███▀▀▀▀▀             ██ ▀▀                ▄██▀▀██▄             
+███▄▄  ▀▀█▄ ████▄ ███▄███▄ ██  ████▄ ▄████   ███▄▄ ▄█▀█▄ ▄█▀█▄ ▄████ ██  ████▄ ▄████   ███  ███ ████▄ ████▄ 
+███▀▀ ▄█▀██ ██ ▀▀ ██ ██ ██ ██  ██ ██ ██ ██   ███▀▀ ██▄█▀ ██▄█▀ ██ ██ ██  ██ ██ ██ ██   ███▀▀███ ██ ██ ██ ██ 
+███   ▀█▄██ ██    ██ ██ ██ ██▄ ██ ██ ▀████   ███   ▀█▄▄▄ ▀█▄▄▄ ▀████ ██▄ ██ ██ ▀████   ███  ███ ████▀ ████▀ 
+                                        ██                                        ██            ██    ██    
+                                      ▀▀▀                                       ▀▀▀             ▀▀    ▀▀    +
+            ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Track animal feeding, monitor health indicators, calculate feed costs, receive feeding alerts, and manage your farm's budget all in one place.\n");
+            Console.WriteLine("==========================================================\n");
 
             // Get budget before starting
             Console.WriteLine("Enter your weekly feeding budget ($):");
