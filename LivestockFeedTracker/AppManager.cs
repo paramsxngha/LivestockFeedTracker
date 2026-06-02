@@ -86,13 +86,13 @@ namespace LivestockFeedTracker
 
         public (double min, double max) GetFeedingRange(string species)
         {
-            if (species == "Dairy Cow") return (49000, 70000);
-            if (species == "Beef Cow") return (42000, 63000);
-            if (species == "Sheep") return (2800, 4900);
-            if (species == "Pig") return (7000, 14000);
-            if (species == "Chicken") return (700, 1050);
-            if (species == "Goat") return (3500, 6000);
-            return (56000, 84000);
+            if (species == "Dairy Cow") return (56000, 63000);
+            if (species == "Beef Cow") return (45000, 52000);
+            if (species == "Sheep") return (3150, 3850);
+            if (species == "Pig") return (9800, 11200);
+            if (species == "Chicken") return (770, 910);
+            if (species == "Goat") return (4200, 5250);
+            return (63000, 73500);
         }
 
         // Returns the max amount an animal can eat in a single day
@@ -306,6 +306,33 @@ namespace LivestockFeedTracker
                 foreach (Animal a in under)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(a.GetShortSummary());
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+            }
+            // Show correctly eating list
+            List<Animal> correct = new List<Animal>();
+            foreach (Animal a in animalList)
+            {
+                var (mn, mx) = GetFeedingRange(a.GetSpeciesName());
+                if (a.GetFeedingStatus(mn, mx) == "Correct")
+                {
+                    correct.Add(a);
+                }
+            }
+
+            Console.WriteLine("\n--- Eating Correctly ---");
+            if (correct.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("None");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                foreach (Animal a in correct)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine(a.GetShortSummary());
                     Console.ForegroundColor = ConsoleColor.White;
                 }

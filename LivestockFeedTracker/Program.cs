@@ -17,7 +17,7 @@ namespace LivestockFeedTracker
             return char.ToUpper(input[0]) + input.Substring(1).ToLower();
         }
 
-        // Checks the name/id is not blank
+        //Asks for and returns the animal name/id and checks to make sure the name/id is not blank
         static string CheckNameID()
         {
             string input = Console.ReadLine();
@@ -179,6 +179,15 @@ namespace LivestockFeedTracker
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(status);
                 Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Range: {min}g - {max}g per week for {chosenSpecies}");
+                Console.WriteLine($"Your animal is eating within the healthy range.");
+            }
+            else if (status == "Undereating")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(status);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
             }
             else
             {
@@ -186,14 +195,6 @@ namespace LivestockFeedTracker
                 Console.WriteLine(status);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
-            }
-
-            // Show vet alert if severely undereating
-            if (newAnimal.NeedsVet(min))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("VET ALERT : This animal needs to see a vet.");
-                Console.ForegroundColor = ConsoleColor.White;
             }
 
             // Show budget after each animal added
