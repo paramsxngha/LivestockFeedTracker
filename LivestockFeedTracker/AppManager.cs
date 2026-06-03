@@ -84,16 +84,20 @@ namespace LivestockFeedTracker
             return new List<string>(foodBySpecies.Keys);
         }
 
-        public (double min, double max) GetFeedingRange(string species)
-        {
-            if (species == "Dairy Cow") return (56000, 63000);
-            if (species == "Beef Cow") return (45000, 52000);
-            if (species == "Sheep") return (3150, 3850);
-            if (species == "Pig") return (9800, 11200);
-            if (species == "Chicken") return (770, 910);
-            if (species == "Goat") return (4200, 5250);
-            return (63000, 73500);
-        }
+        
+            public (double min, double max) GetFeedingRange(string species)
+            {
+                // Values represent total intake in grams per week
+                if (species == "Dairy Cow") return (105000, 140000);   
+                if (species == "Beef Cow") return (84000, 112000);     
+                if (species == "Sheep") return (10500, 17500);         
+                if (species == "Pig") return (14000, 24500);           
+                if (species == "Chicken") return (700, 1050);          
+                if (species == "Goat") return (14000, 21000);          
+
+                return (112000, 133000); 
+            }
+        
 
         // Returns the max amount an animal can eat in a single day
         public double GetMaxDailyFood(string species)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace LivestockFeedTracker
 {
     class Program
@@ -56,26 +58,49 @@ namespace LivestockFeedTracker
             }
         }
 
-        // Checks daily food amount is valid for the species
+        // Checks daily food amount — max is twice the recommended daily amount
         static double CheckFoodAmount(double maxDaily, string species)
         {
+            double absoluteMax = maxDaily * 1.75;
+
             while (true)
             {
+                string input = Console.ReadLine();
+
+                // Reject anything starting with 0 followed by another digit (e.g. 09, 007)
+                if (input.Length > 1 && input[0] == '0' && char.IsDigit(input[1]))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"ERROR: Number must start with a digit 1-9. Please re-enter without a leading zero (e.g. {maxDaily:F0}):");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    continue;
+                }
+
                 try
                 {
-                    double amount = Convert.ToDouble(Console.ReadLine());
-                    if (amount >= 0 && amount <= maxDaily)
+                    double amount = Convert.ToDouble(input);
+
+                    if (amount < 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"ERROR: Amount cannot be negative. Please enter a number between 0 and {absoluteMax:F0}g (e.g. {maxDaily:F0}):");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    else if (amount > absoluteMax)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"ERROR: Amount exceeds the maximum of {absoluteMax:F0}g per day for {species}. Please enter a smaller value (e.g. {maxDaily:F0}):");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    else
                     {
                         return amount;
                     }
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Invalid input. Amount must be between 0 and {maxDaily}g for {species}. (e.g. 500)");
-                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 catch
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid input. Please enter a valid number. (e.g. 500)");
+                    Console.WriteLine($"ERROR: Invalid input. Please enter digits only with no letters or symbols (e.g. {maxDaily:F0}):");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
             }
@@ -143,13 +168,17 @@ namespace LivestockFeedTracker
             string chosenFood = foods[foodChoice];
             double gramCost = appManager.GetFeedCost(chosenFood);
 
-            // Enter food for each day
+            // Enter food for each day — 
             double[] foodEachDay = new double[7];
             double maxDaily = appManager.GetMaxDailyFood(chosenSpecies);
-            Console.WriteLine($"\nEnter grams eaten each day (max {maxDaily}g per day for {chosenSpecies}):");
+            double absoluteMax = maxDaily * 1.75;
+
+            Console.WriteLine($"\nEnter grams eaten each day (max {maxDaily * 1.75:F0}g per day for {chosenSpecies}):");
+
             for (int i = 0; i < DAYS.Count; i++)
             {
-                Console.WriteLine($"{DAYS[i]}:");
+                Console.WriteLine($"\n--- {DAYS[i]} ---");
+                Console.Write("Grams: ");
                 foodEachDay[i] = CheckFoodAmount(maxDaily, chosenSpecies);
             }
 
@@ -164,13 +193,15 @@ namespace LivestockFeedTracker
             Console.WriteLine($"Name/ID   : {nameID}");
             Console.WriteLine($"Species   : {chosenSpecies}");
             Console.WriteLine($"Food Type : {chosenFood}  (${gramCost * 100:F2} per 100g)");
+
             for (int i = 0; i < DAYS.Count; i++)
             {
                 Console.WriteLine($"{DAYS[i]}: {foodEachDay[i]}g  (${foodEachDay[i] * gramCost:F2})");
             }
+
             Console.WriteLine($"Total Food: {newAnimal.GetTotalWeeklyFood()}g");
             Console.WriteLine($"Daily Avg : {newAnimal.GetDailyAverage():F1}g");
-            Console.WriteLine($"Cost      : ${newAnimal.GetWeeklyCost():F2}");
+            Console.WriteLine($"Cost: ${newAnimal.GetWeeklyCost():F2}");
 
             // Show status in colour
             Console.Write("Status    : ");
@@ -180,7 +211,7 @@ namespace LivestockFeedTracker
                 Console.WriteLine(status);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Range: {min}g - {max}g per week for {chosenSpecies}");
-                Console.WriteLine($"Your animal is eating within the healthy range.");
+                Console.WriteLine("Your animal is eating within the healthy range.");
             }
             else if (status == "Undereating")
             {
@@ -195,6 +226,14 @@ namespace LivestockFeedTracker
                 Console.WriteLine(status);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"Advice    : {appManager.GetFeedingAdvice(chosenSpecies, status)}");
+            }
+
+            // Show vet alert if severely undereating
+            if (newAnimal.NeedsVet(min))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("VET ALERT : This animal needs to see a vet.");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             // Show budget after each animal added
