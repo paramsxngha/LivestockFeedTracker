@@ -5,7 +5,7 @@ namespace LivestockFeedTracker
 {
     class Program
     {
-        static AppManager appManager;
+        static AppManager appManager; 
         static List<string> DAYS = new List<string>()
         {
             "Monday", "Tuesday", "Wednesday",
@@ -22,13 +22,13 @@ namespace LivestockFeedTracker
         //Asks for and returns the animal name/id and checks to make sure the name/id is not blank
         static string CheckNameID()
         {
-            string input = Console.ReadLine();
+            string input = Console.ReadLine() ?? ""; 
             while (input.Equals(""))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Invalid input. Cannot be blank. (e.g. Molly#COW01)");
                 Console.ForegroundColor = ConsoleColor.White;
-                input = Console.ReadLine();
+                input = Console.ReadLine() ?? "";
             }
             return input;
         }
@@ -58,14 +58,14 @@ namespace LivestockFeedTracker
             }
         }
 
-        // Checks daily food amount — max is twice the recommended daily amount
+        // Checks daily food amount  max is 1.75x the recommended daily amount so the animals can still overaet without someone being able to input like 100000000g
         static double CheckFoodAmount(double maxDaily, string species)
         {
             double absoluteMax = maxDaily * 1.75;
 
             while (true)
             {
-                string input = Console.ReadLine();
+                string input = Console.ReadLine() ?? ""; 
 
                 // Reject anything starting with 0 followed by another digit (e.g. 09, 007)
                 if (input.Length > 1 && input[0] == '0' && char.IsDigit(input[1]))
@@ -147,7 +147,7 @@ namespace LivestockFeedTracker
             string nameID = CheckNameID();
 
             // Show species menu
-            List<string> species = appManager.GetSpeciesList();
+            List<string> species = appManager!.GetSpeciesList(); 
             Console.WriteLine("\nSelect species:");
             for (int i = 0; i < species.Count; i++)
             {
@@ -168,7 +168,7 @@ namespace LivestockFeedTracker
             string chosenFood = foods[foodChoice];
             double gramCost = appManager.GetFeedCost(chosenFood);
 
-            // Enter food for each day — 
+            // Enter food for each day  
             double[] foodEachDay = new double[7];
             double maxDaily = appManager.GetMaxDailyFood(chosenSpecies);
             double absoluteMax = maxDaily * 1.75;
@@ -282,7 +282,7 @@ namespace LivestockFeedTracker
             {
                 OneAnimal();
                 Console.WriteLine("Press <Enter> to add another animal or type 'Stop' to finish.");
-                proceed = Console.ReadLine().ToUpper();
+                proceed = (Console.ReadLine() ?? "").ToUpper(); 
             }
 
             // Show full farm summary at end
